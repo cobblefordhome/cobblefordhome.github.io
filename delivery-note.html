@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Delivery note – Cobbleford Home &amp; Garden</title>
+<link rel="stylesheet" href="shop.css">
+<script src="shop.js"></script>
+</head>
+<body>
+<div id="top"></div>
+<main class="wrap" id="main"></main>
+<div id="bottom"></div>
+<script>frame();
+var no = param("order"), o = (load("cf_orders", {}))[no];
+function addr(o) { return [o.name, o.line1, o.line2, o.town, o.postcode].filter(Boolean).map(esc).join("<br>"); }
+function eta(o) {
+  var placed = new Date(o.placed), hr = +londonParts(placed).hour;
+  if (o.method === "nextday") return longDate(addWorkingDays(placed, hr < 22 ? 1 : 2));
+  return "between " + longDate(addWorkingDays(placed, 3)) + " and " + longDate(addWorkingDays(placed, 5));
+}
+function dispatch(o) { var placed = new Date(o.placed), hr = +londonParts(placed).hour;
+  return o.method === "nextday" && hr < 22 ? placed : addWorkingDays(placed, 1); }
+function itemsTable(o, prices) {
+  return '<table class="lines"><tr><th>Code</th><th>Item</th><th class="num">Qty</th>' + (prices ? '<th class="num">Price</th><th class="num">Total</th>' : '') + '</tr>' +
+    o.lines.map(function (l) { var p = bySku(l.sku); return '<tr><td>' + p.sku + '</td><td>' + esc(p.name) + '</td><td class="num">' + l.qty + '</td>' +
+      (prices ? '<td class="num">' + money(p.price) + '</td><td class="num">' + money(p.price * l.qty) + '</td>' : '') + '</tr>'; }).join("") + '</table>';
+}
+
+var m = document.getElementById("main");
+if (!o) { m.innerHTML = '<div class="panel"><h1>Order not found</h1><p>This order is not saved in this browser. To print a delivery note, place the same order in this browser first.</p></div>'; }
+else {
+  document.title = "Delivery note " + o.no + " \u2013 Cobbleford Home & Garden";
+  m.innerHTML =
+    '<p class="no-print"><button class="btn" onclick="window.print()">Print delivery note</button> <a class="btn light" href="confirmation.html?order=' + encodeURIComponent(o.no) + '">Back to order</a></p>' +
+    '<div class="panel"><div class="two"><div><h2 style="margin:0">Cobbleford Home &amp; Garden</h2><p class="small">' + SHOP.address + '<br>' + SHOP.phone + '</p></div>' +
+    '<div style="text-align:right"><h1 style="margin:0">DELIVERY NOTE</h1><p>Order <strong>' + o.no + '</strong><br>Order date ' + shortDate(new Date(o.placed)) +
+    '<br>Dispatched ' + shortDate(dispatch(o)) + '<br>Parcel 1 of 1</p></div></div>' +
+    '<h3>Deliver to</h3><p>' + addr(o) + '</p>' +
+    '<h3>Contents</h3>' + itemsTable(o, false) +
+    '<p class="small">Please check your items. Returns accepted within 30 days with this note.</p>' +
+    '<p class="small">FICTIONAL DOCUMENT \u2013 created for COMP1812 coursework (University of Greenwich). Not a real shop or delivery.</p></div>';
+}</script>
+</body>
+</html>

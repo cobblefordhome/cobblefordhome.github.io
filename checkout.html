@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Checkout – Cobbleford Home &amp; Garden</title>
+<link rel="stylesheet" href="shop.css">
+<script src="shop.js"></script>
+</head>
+<body>
+<div id="top"></div>
+<main class="wrap">
+<h1>Checkout</h1>
+<p class="small">Guest checkout. This is a fictional shop: what you type stays in this browser and is not sent anywhere.</p>
+<form id="f" novalidate onsubmit="return false;">
+<div class="two">
+<div>
+<div class="panel"><h2>Delivery address</h2>
+<div class="form-grid">
+<label class="full">Full name<input type="text" name="name" autocomplete="name" required></label>
+<label>Email<input type="email" name="email" autocomplete="email" required></label>
+<label>Phone (optional)<input type="tel" name="phone" autocomplete="tel"></label>
+<label class="full">Address line 1<input type="text" name="line1" autocomplete="address-line1" required></label>
+<label class="full">Address line 2 (optional)<input type="text" name="line2" autocomplete="address-line2"></label>
+<label>Town or city<input type="text" name="town" autocomplete="address-level2" required></label>
+<label>Postcode<input type="text" name="postcode" autocomplete="postal-code" required></label>
+</div></div>
+<div class="panel"><h2>Delivery</h2>
+<label class="radio"><input type="radio" name="method" value="standard" checked> <span id="std"></span></label>
+<label class="radio"><input type="radio" name="method" value="nextday"> <span id="nd"></span></label>
+</div>
+<div class="panel"><h2>Payment</h2>
+<p class="small">Pay with a Cobbleford gift card. (Fictional shop – card payments are not available and no payment is taken.)</p>
+<div class="form-grid"><label class="full">Gift card number<input type="text" name="gift" inputmode="numeric" autocomplete="off" placeholder="16 digits"></label></div>
+</div>
+</div>
+<div>
+<div class="panel"><h2>Order summary</h2><div id="sum"></div>
+<p><label><input type="checkbox" name="terms"> I agree to the terms and conditions</label></p>
+<p id="msg" class="err"></p>
+<p><button class="btn" type="submit">Place order</button></p></div>
+</div>
+</div>
+</form>
+</main>
+<div id="bottom"></div>
+<script>frame();
+var f = document.getElementById("f");
+if (!getBasket().length) { location.href = "basket.html"; }
+function method() { return f.elements.method.value || "standard"; }
+function drawSum() {
+  var b = getBasket(), t = totals(b, method());
+  document.getElementById("std").textContent = DELIVERY.standard.label + " \u2013 " + (t.sub >= 40 ? "FREE" : money(DELIVERY.standard.price));
+  document.getElementById("nd").textContent = DELIVERY.nextday.label + " \u2013 " + money(DELIVERY.nextday.price);
+  document.getElementById("sum").innerHTML = '<table class="lines">' + b.map(function (l) { var p = bySku(l.sku);
+    return '<tr><td>' + l.qty + ' \u00d7 ' + esc(p.name) + '</td><td class="num">' + money(p.price * l.qty) + '</td></tr>'; }).join("") +
+    '</table><table class="lines tot"><tr><td>Subtotal</td><td class="num">' + money(t.sub) + '</td></tr><tr><td>Delivery</td><td class="num">' + (t.del ? money(t.del) : "FREE") + '</td></tr>' +
+    '<tr class="grand"><td>Total (incl. VAT)</td><td class="num">' + money(t.total) + '</td></tr></table>';
+}
+[].forEach.call(f.elements.method, function (r) { r.onchange = drawSum; });
+drawSum();
+f.onsubmit = function (e) {
+  e.preventDefault();
+  var need = ["name", "email", "line1", "town", "postcode"], missing = need.filter(function (k) { return !f.elements[k].value.trim(); });
+  var gift = f.elements['gift'].value.replace(/\D/g, "");
+  var msg = document.getElementById("msg");
+  if (missing.length) { msg.textContent = "Please fill in all the required address fields."; return; }
+  if (gift.length !== 16) { msg.textContent = "Please enter a 16-digit gift card number."; return; }
+  if (!f.elements['terms'].checked) { msg.textContent = "Please tick the box to agree to the terms and conditions."; return; }
+  var now = new Date(), b = getBasket(), m = method(), t = totals(b, m);
+  var no = orderNumber(now, f.elements['name'].value, f.elements['postcode'].value, b, m);
+  var order = {no: no, placed: now.toISOString(), method: m, lines: b, totals: t, giftLast4: gift.slice(-4),
+    name: f.elements['name'].value.trim(), email: f.elements['email'].value.trim(), phone: f.elements['phone'].value.trim(),
+    line1: f.elements['line1'].value.trim(), line2: f.elements['line2'].value.trim(), town: f.elements['town'].value.trim(), postcode: f.elements['postcode'].value.trim().toUpperCase()};
+  var orders = load("cf_orders", {}); orders[no] = order; save("cf_orders", orders);
+  setBasket([]);
+  location.href = "confirmation.html?order=" + encodeURIComponent(no);
+};</script>
+</body>
+</html>
