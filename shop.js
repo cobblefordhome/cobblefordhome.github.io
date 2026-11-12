@@ -49,7 +49,8 @@ var SHOP = {name: "Cobbleford Home & Garden", phone: "020 7946 0772",
   address: "Unit 4, Fernhill Trading Estate, Cobbleford"};
 var DELIVERY = {
   standard: {label: "Standard delivery (3–5 working days)", price: 3.95, freeOver: 40},
-  nextday: {label: "Next working day delivery (order by 22:00)", price: 5.99}
+  nextday: {label: "Next working day delivery (order by midnight)", price: 5.99, cutoff: 24},
+  sameday: {label: "Same-day delivery, London postcodes (order by 11:00, delivered 13:00–15:00)", price: 7.99, cutoff: 11}
 };
 
 function money(n) { return "£" + n.toFixed(2); }

@@ -17,10 +17,14 @@ var no = param("order"), o = (load("cf_orders", {}))[no];
 function addr(o) { return [o.name, o.line1, o.line2, o.town, o.postcode].filter(Boolean).map(esc).join("<br>"); }
 function eta(o) {
   var placed = new Date(o.placed), hr = +londonParts(placed).hour;
-  if (o.method === "nextday") return longDate(addWorkingDays(placed, hr < 22 ? 1 : 2));
+  var wd = londonParts(placed).weekday, workday = wd !== "Sat" && wd !== "Sun";
+  if (o.method === "sameday") return (workday && hr < 11) ? longDate(placed) + ", 13:00\u201315:00" : longDate(addWorkingDays(placed, 1));
+  if (o.method === "nextday") return longDate(addWorkingDays(placed, hr < (DELIVERY.nextday.cutoff || 22) ? 1 : 2));
   return "between " + longDate(addWorkingDays(placed, 3)) + " and " + longDate(addWorkingDays(placed, 5));
 }
 function dispatch(o) { var placed = new Date(o.placed), hr = +londonParts(placed).hour;
+  var wd = londonParts(placed).weekday, workday = wd !== "Sat" && wd !== "Sun";
+  if (o.method === "sameday" && workday && hr < 11) return placed;
   return o.method === "nextday" && hr < 22 ? placed : addWorkingDays(placed, 1); }
 function itemsTable(o, prices) {
   return '<table class="lines"><tr><th>Code</th><th>Item</th><th class="num">Qty</th>' + (prices ? '<th class="num">Price</th><th class="num">Total</th>' : '') + '</tr>' +

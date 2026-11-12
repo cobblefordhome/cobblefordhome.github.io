@@ -29,6 +29,7 @@
 <div class="panel"><h2>Delivery</h2>
 <label class="radio"><input type="radio" name="method" value="standard" checked> <span id="std"></span></label>
 <label class="radio"><input type="radio" name="method" value="nextday"> <span id="nd"></span></label>
+<label class="radio"><input type="radio" name="method" value="sameday"> <span id="sd"></span></label>
 </div>
 <div class="panel"><h2>Payment</h2>
 <p class="small">Pay with a Cobbleford gift card. (Fictional shop – card payments are not available and no payment is taken.)</p>
@@ -53,6 +54,7 @@ function drawSum() {
   var b = getBasket(), t = totals(b, method());
   document.getElementById("std").textContent = DELIVERY.standard.label + " \u2013 " + (t.sub >= 40 ? "FREE" : money(DELIVERY.standard.price));
   document.getElementById("nd").textContent = DELIVERY.nextday.label + " \u2013 " + money(DELIVERY.nextday.price);
+  document.getElementById("sd").textContent = DELIVERY.sameday.label + " \u2013 " + money(DELIVERY.sameday.price);
   document.getElementById("sum").innerHTML = '<table class="lines">' + b.map(function (l) { var p = bySku(l.sku);
     return '<tr><td>' + l.qty + ' \u00d7 ' + esc(p.name) + '</td><td class="num">' + money(p.price * l.qty) + '</td></tr>'; }).join("") +
     '</table><table class="lines tot"><tr><td>Subtotal</td><td class="num">' + money(t.sub) + '</td></tr><tr><td>Delivery</td><td class="num">' + (t.del ? money(t.del) : "FREE") + '</td></tr>' +

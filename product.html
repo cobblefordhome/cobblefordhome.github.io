@@ -21,7 +21,7 @@ else {
   m.innerHTML = '<p class="small"><a href="index.html">Home</a> \u203a <a href="search.html?cat=' + encodeURIComponent(p.cat) + '">' + esc(p.cat) + '</a></p>' +
     '<div class="product"><img src="' + p.img + '" alt=""><div><h1>' + esc(p.name) + '</h1>' +
     '<p class="small">Product code ' + p.sku + '</p><div class="price">' + money(p.price) + '</div>' +
-    '<p class="stock">In stock \u2013 order by 22:00 for next working day delivery</p><p>' + esc(p.desc) + '</p>' +
+    '<p class="stock">In stock \u2013 order by midnight for next working day delivery</p><p>' + esc(p.desc) + '</p>' +
     '<p><label>Quantity <select id="qty"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label></p>' +
     '<p><button class="btn" id="add">Add to basket</button></p></div></div>';
   document.getElementById("add").onclick = function () {
