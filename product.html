@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Cobbleford Home &amp; Garden</title>
+<link rel="stylesheet" href="shop.css">
+<script src="shop.js"></script>
+</head>
+<body>
+<div id="top"></div>
+<main class="wrap" id="main"></main>
+<div id="bottom"></div>
+<script>frame();
+var p = bySlug(param("p"));
+var m = document.getElementById("main");
+if (!p) { m.innerHTML = "<h1>Product not found</h1><p><a href='index.html'>Back to the shop</a></p>"; }
+else {
+  document.title = p.name + " \u2013 Cobbleford Home & Garden";
+  m.innerHTML = '<p class="small"><a href="index.html">Home</a> \u203a <a href="search.html?cat=' + encodeURIComponent(p.cat) + '">' + esc(p.cat) + '</a></p>' +
+    '<div class="product"><img src="' + p.img + '" alt=""><div><h1>' + esc(p.name) + '</h1>' +
+    '<p class="small">Product code ' + p.sku + '</p><div class="price">' + money(p.price) + '</div>' +
+    '<p class="stock">In stock \u2013 order by midnight for next working day delivery</p><p>' + esc(p.desc) + '</p>' +
+    '<p><label>Quantity <select id="qty"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label></p>' +
+    '<p><button class="btn" id="add">Add to basket</button></p></div></div>';
+  document.getElementById("add").onclick = function () {
+    addToBasket(p.sku, parseInt(document.getElementById("qty").value, 10));
+    location.href = "basket.html";
+  };
+}</script>
+</body>
+</html>

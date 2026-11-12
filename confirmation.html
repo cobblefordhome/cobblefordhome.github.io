@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Order confirmed – Cobbleford Home &amp; Garden</title>
+<link rel="stylesheet" href="shop.css">
+<script src="shop.js"></script>
+</head>
+<body>
+<div id="top"></div>
+<main class="wrap" id="main"></main>
+<div id="bottom"></div>
+<script>frame();
+var no = param("order"), o = (load("cf_orders", {}))[no];
+function addr(o) { return [o.name, o.line1, o.line2, o.town, o.postcode].filter(Boolean).map(esc).join("<br>"); }
+function eta(o) {
+  var placed = new Date(o.placed), hr = +londonParts(placed).hour;
+  var wd = londonParts(placed).weekday, workday = wd !== "Sat" && wd !== "Sun";
+  if (o.method === "sameday") return (workday && hr < 11) ? longDate(placed) + ", 13:00\u201315:00" : longDate(addWorkingDays(placed, 1));
+  if (o.method === "nextday") return longDate(addWorkingDays(placed, hr < (DELIVERY.nextday.cutoff || 22) ? 1 : 2));
+  return "between " + longDate(addWorkingDays(placed, 3)) + " and " + longDate(addWorkingDays(placed, 5));
+}
+function dispatch(o) { var placed = new Date(o.placed), hr = +londonParts(placed).hour;
+  var wd = londonParts(placed).weekday, workday = wd !== "Sat" && wd !== "Sun";
+  if (o.method === "sameday" && workday && hr < 11) return placed;
+  return o.method === "nextday" && hr < 22 ? placed : addWorkingDays(placed, 1); }
+function itemsTable(o, prices) {
+  return '<table class="lines"><tr><th>Code</th><th>Item</th><th class="num">Qty</th>' + (prices ? '<th class="num">Price</th><th class="num">Total</th>' : '') + '</tr>' +
+    o.lines.map(function (l) { var p = bySku(l.sku); return '<tr><td>' + p.sku + '</td><td>' + esc(p.name) + '</td><td class="num">' + l.qty + '</td>' +
+      (prices ? '<td class="num">' + money(p.price) + '</td><td class="num">' + money(p.price * l.qty) + '</td>' : '') + '</tr>'; }).join("") + '</table>';
+}
+
+var m = document.getElementById("main");
+if (!o) { m.innerHTML = '<div class="panel"><h1>Order not found</h1><p>This order is not saved in this browser.</p></div>'; }
+else {
+  var placed = new Date(o.placed), t = o.totals;
+  document.title = "Order " + o.no + " confirmed \u2013 Cobbleford Home & Garden";
+  m.innerHTML =
+    '<div class="print-only"><h2 style="margin:0">Cobbleford Home &amp; Garden</h2><p class="small">' + SHOP.address + ' \u00b7 ' + SHOP.phone + '</p><h1 style="margin:10px 0">Order confirmation and receipt</h1></div>' +
+    '<div class="panel ok no-print"><h1 style="margin-top:0">Thank you, ' + esc(o.name.split(" ")[0]) + ' \u2013 your order is confirmed</h1>' +
+    '<p>We don\u2019t send emails for guest orders, so please print or save this receipt for your records.</p>' +
+    '<p><button class="btn" onclick="window.print()">Print or save receipt</button> <a class="btn secondary" href="delivery-note.html?order=' + encodeURIComponent(o.no) + '">Delivery note</a> <a class="btn light" href="index.html">Continue shopping</a></p></div>' +
+    '<div class="two"><div class="panel"><h2>Order details</h2><table class="lines">' +
+    '<tr><td>Order number</td><td><strong>' + o.no + '</strong></td></tr>' +
+    '<tr><td>Order placed</td><td>' + shortDate(placed) + ' at ' + timeHM(placed) + '</td></tr>' +
+    '<tr><td>Payment</td><td>Paid in full \u2013 Cobbleford gift card ending ' + o.giftLast4 + '</td></tr>' +
+    '<tr><td>Delivery</td><td>' + esc(DELIVERY[o.method].label) + '</td></tr>' +
+    '<tr><td>Estimated delivery</td><td>' + eta(o) + '</td></tr></table></div>' +
+    '<div class="panel"><h2>Delivery address</h2><p>' + addr(o) + '</p><p class="small">' + esc(o.email) + (o.phone ? ' \u00b7 ' + esc(o.phone) : '') + '</p></div></div>' +
+    '<div class="panel"><h2>Items</h2>' + itemsTable(o, true) +
+    '<table class="lines tot"><tr><td>Subtotal</td><td class="num">' + money(t.sub) + '</td></tr><tr><td>Delivery</td><td class="num">' + (t.del ? money(t.del) : "FREE") + '</td></tr>' +
+    '<tr class="grand"><td>Total paid</td><td class="num">' + money(t.total) + '</td></tr><tr><td class="small">Includes VAT at 20%</td><td class="num small">' + money(t.vat) + '</td></tr></table></div>' +
+    '<p class="small print-only">FICTIONAL RECEIPT \u2013 created for COMP1812 coursework (University of Greenwich). Not a real shop or transaction.</p>';
+}</script>
+</body>
+</html>
